@@ -1,0 +1,499 @@
+/* === GLOBAL STYLES === */
+body {
+  background: #f4f6fb;
+  font-family: "Poppins", sans-serif;
+  margin: 0;
+  color: #1e1f26;
+}
+
+/* === NAVBAR === */
+.navbar {
+  background: #000B58;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+}
+
+.navbar h1 {
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.btn-back {
+  background: white;
+  color: #000B58;
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: 0.3s;
+}
+.btn-back:hover {
+  background: #e6f0ff;
+}
+
+/* === CONTENT === */
+.content-section {
+  padding: 30px;
+}
+
+/* === HEADER + BUTTONS === */
+.records-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.btn-group {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.btn-primary,
+.btn-seed,
+.btn-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: none;
+  padding: 0.6rem 1.1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.btn-primary {
+  background: #0072ff;
+  color: white;
+}
+.btn-primary:hover {
+  background: #005bd1;
+}
+
+.btn-seed {
+  background: #00b58a;
+  color: white;
+}
+.btn-seed:hover {
+  background: #00916e;
+}
+
+.btn-clear {
+  background: #dc3545;
+  color: white;
+}
+.btn-clear:hover {
+  background: #b72b38;
+}
+
+/* === ADD FORM === */
+.add-form {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  background: #fff;
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.add-form input,
+.add-form select {
+  padding: 0.7rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  flex: 1;
+  min-width: 200px;
+}
+
+.hidden {
+  display: none;
+}
+
+/* === TABLE CONTAINER === */
+.table-container {
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  margin-top: 20px;
+  transition: 0.3s ease;
+}
+
+#records-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#records-table thead {
+  background: #000B58;
+  color: white;
+}
+
+#records-table th {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.9rem;
+  padding: 14px 18px;
+  border-bottom: 2px solid #e6e6e6;
+}
+
+#records-table th svg {
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+#records-table td {
+  padding: 14px 18px;
+  border-bottom: 1px solid #f1f1f1;
+  font-size: 0.95rem;
+  color: #333;
+  transition: background 0.25s ease;
+}
+
+/* === TABLE ROWS === */
+#records-table tbody tr:nth-child(odd) {
+  background: #f9fafc;
+}
+#records-table tbody tr:nth-child(even) {
+  background: #ffffff;
+}
+#records-table tbody tr:hover {
+  background: #eef3ff;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+/* === EMPTY STATE === */
+.empty-row td {
+  text-align: center;
+  padding: 2rem;
+  color: #777;
+  font-size: 0.95rem;
+  font-style: italic;
+}
+
+/* === SCROLL STYLING === */
+.table-container::-webkit-scrollbar {
+  height: 6px;
+}
+.table-container::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 8px;
+}
+
+/* === EMPTY / LOADING === */
+.loading-text,
+.empty-text,
+.error-text {
+  text-align: center;
+  padding: 20px;
+  color: #6b7280;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  .content-section {
+    padding: 20px;
+  }
+
+  .navbar h1 {
+    font-size: 1.1rem;
+  }
+
+ 
+
+  .btn-group {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .add-form {
+    flex-direction: column;
+  }
+}
+
+/* === POPUP STYLING === */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.popup {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  animation: popupSlide 0.25s ease;
+}
+
+.popup.success {
+  border-top: 6px solid #00b894;
+}
+
+.popup.error {
+  border-top: 6px solid #e74c3c;
+}
+
+.popup h3 {
+  margin-bottom: 1rem;
+  font-weight: 600;
+  color: #1e1f26;
+}
+
+.popup button {
+  background: #000B58;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.4rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.popup button:hover {
+  background: #0072ff;
+}
+
+@keyframes popupSlide {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* === BUTTONS === */
+#seedStaffBtn, #clearStaffBtn {
+  background: #000B58;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-right: 10px;
+  transition: 0.3s;
+}
+
+#seedStaffBtn:hover, #clearStaffBtn:hover {
+  background: #0072ff;
+}
+
+#staff-role {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+  font-size: 1rem;
+  color: #333;
+  outline: none;
+  transition: 0.3s;
+  cursor: pointer;
+}
+
+#staff-role:focus {
+  border-color: #0072ff;
+  box-shadow: 0 0 0 2px rgba(0, 114, 255, 0.2);
+}
+
+#staff-role option {
+  padding: 0.5rem;
+}
+
+
+/* === STAFF RECORDS PAGE === */
+.records-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.records-header input,
+.records-header select {
+  padding: 0.6rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  min-width: 150px;
+  transition: 0.3s;
+}
+
+.records-header input:focus,
+.records-header select:focus {
+  outline: none;
+  border-color: #000b58; /* Navy blue focus */
+  box-shadow: 0 0 0 2px rgba(0, 11, 88, 0.2);
+}
+
+.table-container {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  overflow-x: auto;
+  margin-top: 10px;
+}
+
+#staff-table-body {
+  font-size: 0.95rem;
+}
+
+#staff-table-body tr:hover {
+  background-color: #f1f5ff; /* subtle hover highlight */
+}
+
+#staff-table-body td,
+#staff-table-body th {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+#staff-table-body th {
+  background-color: #f9fafc;
+  font-weight: 600;
+  color: #333;
+}
+
+.btn-primary,
+#toggleAddForm,
+#seedStaffBtn,
+#clearStaffBtn {
+  background-color: #000b58; /* Navy blue */
+  color: #fff;
+  border: none;
+  padding: 0.55rem 1.1rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-primary:hover,
+#toggleAddForm:hover,
+#seedStaffBtn:hover,
+#clearStaffBtn:hover {
+  background-color: #001270; /* Darker navy on hover */
+}
+
+.add-form {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.add-form input,
+.add-form select {
+  padding: 0.7rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  flex: 1;
+  min-width: 200px;
+  transition: 0.3s;
+}
+
+.add-form input:focus,
+.add-form select:focus {
+  border-color: #000b58;
+  box-shadow: 0 0 0 2px rgba(0, 11, 88, 0.15);
+  outline: none;
+}
+
+.alert-popup {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #fff;
+  border-left: 6px solid;
+  padding: 12px 16px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.95rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: 0.3s ease;
+  z-index: 9999;
+}
+
+.alert-popup.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.alert-popup.success { border-color: #22c55e; }
+.alert-popup.error   { border-color: #ef4444; }
+.alert-popup.warning { border-color: #f59e0b; }
+.alert-popup.info    { border-color: #3b82f6; }
+
+.alert-icon {
+  display: flex;
+  align-items: center;
+}
+
+.alert-msg {
+  font-weight: 500;
+}
+
+/* === Styled Select Dropdown === */
+.add-form select,
+.records-header select {
+  appearance: none; /* Remove default arrow */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 0.7rem 1rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: 0.3s;
+  background-image: url("data:image/svg+xml,%3Csvg fill='none' stroke='%23000b58' stroke-width='2' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1em;
+}
+
+.add-form select:focus,
+.records-header select:focus {
+  border-color: #000b58;
+  box-shadow: 0 0 0 2px rgba(0, 11, 88, 0.15);
+  outline: none;
+}
+
+.add-form select option,
+.records-header select option {
+  color: #1e1f26;
+  background: #fff;
+}
+

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Omoolaex Support Chat</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/chat.css">
+</head>
+<body>
+  <header class="chat-header">
+    <h2>Omoolaex Support</h2>
+    <button id="logout-btn">Logout</button>
+  </header>
+
+  <div class="chat-container">
+    <aside class="clients-sidebar">
+      <h3>Clients</h3>
+      <ul id="clients-ul"></ul>
+    </aside>
+
+    <main class="chat-main">
+      <div class="chat-box" id="chat-box"></div>
+      <div class="chat-input-container">
+        <input type="text" id="chat-input" placeholder="Type a message" />
+        <button id="send-chat">Send</button>
+      </div>
+    </main>
+
+    <aside class="client-info-panel" id="client-info">
+      <h3>Select a client</h3>
+      <p>Info will appear here</p>
+    </aside>
+  </div>
+
+  <script type="module" src="js/chat.js"></script>
+</body>
+</html>
