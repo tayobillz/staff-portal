@@ -3,18 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Omoolaex Support Chat</title>
+  <title>Chat</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/chat.css">
 </head>
 <body>
   <header class="chat-header">
-    <h2>Omoolaex Support</h2>
+    <div class="header-left">
+      <button id="menu-toggle" aria-label="Toggle clients sidebar" aria-controls="clients-sidebar">
+        <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <rect x="3" y="6" width="18" height="2" rx="1"></rect>
+          <rect x="3" y="11" width="18" height="2" rx="1"></rect>
+          <rect x="3" y="16" width="18" height="2" rx="1"></rect>
+        </svg>
+      </button>
+      <h2> Support</h2>
+    </div>
     <button id="logout-btn">Logout</button>
   </header>
 
   <div class="chat-container">
-    <aside class="clients-sidebar">
+    <aside class="clients-sidebar" id="clients-sidebar">
       <h3>Clients</h3>
       <ul id="clients-ul"></ul>
     </aside>
