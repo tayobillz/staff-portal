@@ -1,61 +1,31 @@
-import { auth } from "./firebase-config.js";
+import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+import { collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-const chatBox = document.getElementById("chat-box");
-const chatInput = document.getElementById("chat-input");
-const sendChat = document.getElementById("send-chat");
 const logoutBtn = document.getElementById("logout-btn");
-const clientsUl = document.getElementById("clients-ul");
-const clientInfoPanel = document.getElementById("client-info");
+const sendBtn = document.getElementById("send-chat");
+const chatInput = document.getElementById("chat-input");
+const chatBox = document.getElementById("chat-box");
+const clientsList = document.getElementById("clients-ul");
+const clientInfo = document.getElementById("client-info");
+const menuToggle = document.getElementById("menu-toggle");
+const sidebar = document.querySelector(".clients-sidebar");
 
-let currentClientId = null;
+let currentClient = null;
+let unsubscribeMessages = null;
 
+onAuthStateChanged(auth, (user) => {
+  if (!user) window.location.href = "index.html";
+});
 
-function createBubble(text, type, timestamp = new Date()) {
-  const wrapper = document.createElement("div");
-  wrapper.classList.add("bubble-wrapper", type);
+logoutBtn.addEventListener("click", async () => {
+  await signOut(auth);
+  window.location.href = "index.html";
+});
 
-  const bubble = document.createElement("div");
-  bubble.classList.add(
-    "bubble",
-    type === "sent" ? "sent" : type === "received" ? "received" : "system"
-  );
-  bubble.textContent = text;
-
-  const time = document.createElement("span");
-  time.classList.add("timestamp");
-  time.textContent = timestamp.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-
-  bubble.appendChild(document.createElement("br"));
-  bubble.appendChild(time);
-  wrapper.appendChild(bubble);
-
-  chatBox.appendChild(wrapper);
-  chatBox.scrollTop = chatBox.scrollHeight;
-}
-
-
-function showTypingIndicator(sender = "received") {
-  const typingWrapper = document.createElement("div");
-  typingWrapper.classList.add("bubble-wrapper", sender);
-
-  const typingBubble = document.createElement("div");
-  typingBubble.classList.add("bubble", sender, "typing-bubble");
-  typingBubble.innerHTML = `<span class="dot"></span><span class="dot"></span><span class="dot"></span>`;
-
-  typingWrapper.appendChild(typingBubble);
-  chatBox.appendChild(typingWrapper);
-  chatBox.scrollTop = chatBox.scrollHeight;
-  return typingWrapper;
-}
-
-function removeTypingIndicator(el) {
-  if (el && el.parentNode) el.parentNode.removeChild(el);
-}
-
+menuToggle.addEventListener("click", () => {
+  sidebar.classList.toggle("active");
+});
 
 const demoClients = [
   { id: "demoClient001", name: "Chinedu Okafor" },
@@ -69,7 +39,6 @@ const demoClients = [
   { id: "demoClient009", name: "Segun Balogun" },
   { id: "demoClient010", name: "Nkechi Umeh" },
 ];
-
 
 const demoMessages = {
   demoClient001: [
@@ -124,99 +93,126 @@ const demoMessages = {
   ],
 };
 
-
-function loadClients() {
-  clientsUl.innerHTML = "";
-  demoClients.forEach((client) => {
-    const li = document.createElement("li");
-    li.textContent = client.name;
-    li.addEventListener("click", () => {
-      currentClientId = client.id;
-      loadMessages(client.id);
-      updateClientInfo(client);
-    });
-    clientsUl.appendChild(li);
+async function loadClients() {
+  clientsList.innerHTML = "";
+  const q = query(collection(db, "clients"));
+  onSnapshot(q, (snapshot) => {
+    clientsList.innerHTML = "";
+    if (snapshot.empty) {
+      demoClients.forEach((client) => {
+        const li = document.createElement("li");
+        li.textContent = client.name;
+        li.onclick = () => selectDemoClient(client.id, client);
+        clientsList.appendChild(li);
+      });
+    } else {
+      snapshot.forEach((doc) => {
+        const li = document.createElement("li");
+        li.textContent = doc.data().name || "Unnamed Client";
+        li.onclick = () => selectClient(doc.id, doc.data());
+        clientsList.appendChild(li);
+      });
+    }
   });
 }
 
-
-function updateClientInfo(client) {
-  clientInfoPanel.innerHTML = `
-    <h3>${client.name}</h3>
-    <p>Email: hidden</p>
-    <p>Status: Active</p>
-  `;
+function selectClient(id, data) {
+  currentClient = id;
+  clientInfo.innerHTML = `<h3>${data.name || "Client"}</h3><p>${data.email || "No email"}</p>`;
+  if (window.innerWidth <= 768) sidebar.classList.remove("active");
+  loadMessages(id);
 }
 
-
-async function loadMessages(clientId) {
-  chatBox.innerHTML = ""; 
-  const messages = demoMessages[clientId] || [];
-
-  for (let i = 0; i < messages.length; i++) {
-    const msg = messages[i];
-
-    
-    if (msg.sender === "system" || msg.sender === "received") {
-      const typingEl = showTypingIndicator(msg.sender);
-      await new Promise((res) => setTimeout(res, 1200 + Math.random() * 1000));
-      removeTypingIndicator(typingEl);
-    }
-
-    await typeMessage(msg.text, msg.sender);
-  }
+function selectDemoClient(id, data) {
+  currentClient = id;
+  clientInfo.innerHTML = `<h3>${data.name}</h3><p>Email: hidden</p><p>Status: Active</p>`;
+  if (window.innerWidth <= 768) sidebar.classList.remove("active");
+  loadDemoMessages(id);
 }
 
-
-async function typeMessage(text, sender) {
-  const bubble = document.createElement("div");
-  bubble.className = `bubble-wrapper ${sender}`;
-  const inner = document.createElement("div");
-  inner.className = `bubble ${sender}`;
-  bubble.appendChild(inner);
-  chatBox.appendChild(bubble);
-  chatBox.scrollTop = chatBox.scrollHeight;
-
-  for (let i = 0; i < text.length; i++) {
-    inner.textContent += text[i];
-    await new Promise((res) => setTimeout(res, 15 + Math.random() * 20));
+function loadMessages(clientId) {
+  if (unsubscribeMessages) unsubscribeMessages();
+  chatBox.innerHTML = "";
+  const q = query(collection(db, "clients", clientId, "messages"), orderBy("timestamp"));
+  unsubscribeMessages = onSnapshot(q, (snapshot) => {
+    chatBox.innerHTML = "";
+    snapshot.forEach((doc) => {
+      const msg = doc.data();
+      const msgDiv = document.createElement("div");
+      msgDiv.classList.add("bubble-wrapper", msg.sender === "admin" ? "sent" : "received");
+      msgDiv.innerHTML = `
+        <div class="bubble ${msg.sender === "admin" ? "sent" : "received"}">${msg.text}</div>
+        <span class="timestamp">${
+          msg.timestamp
+            ? new Date(msg.timestamp.toDate()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+            : ""
+        }</span>`;
+      chatBox.appendChild(msgDiv);
+    });
     chatBox.scrollTop = chatBox.scrollHeight;
+  });
+}
+
+function loadDemoMessages(clientId) {
+  chatBox.innerHTML = "";
+  const messages = demoMessages[clientId] || [];
+  let i = 0;
+  function typeNext() {
+    if (i >= messages.length) return;
+    const msg = messages[i];
+    const msgDiv = document.createElement("div");
+    msgDiv.classList.add("bubble-wrapper", msg.sender === "sent" ? "sent" : "received");
+    const bubble = document.createElement("div");
+    bubble.classList.add("bubble", msg.sender);
+    msgDiv.appendChild(bubble);
+    chatBox.appendChild(msgDiv);
+    chatBox.scrollTop = chatBox.scrollHeight;
+    let j = 0;
+    const interval = setInterval(() => {
+      bubble.textContent = msg.text.slice(0, j++);
+      if (j > msg.text.length) {
+        clearInterval(interval);
+        const timestamp = document.createElement("span");
+        timestamp.classList.add("timestamp");
+        timestamp.textContent = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        msgDiv.appendChild(timestamp);
+        i++;
+        setTimeout(typeNext, 700);
+      }
+    }, 35);
   }
+  typeNext();
 }
 
-
-function sendMessage() {
-  if (!currentClientId) return alert("Please select a client first!");
-  const msg = chatInput.value.trim();
-  if (!msg) return;
-
-  createBubble(msg, "sent");
-  chatInput.value = "";
-
-  
-  const typingEl = showTypingIndicator("received");
-  setTimeout(() => {
-    removeTypingIndicator(typingEl);
-    createBubble("Thank you for your message. Our support representative will review it shortly.", "received");
-  }, 1800 + Math.random() * 1000);
-}
-
-
-sendChat.addEventListener("click", sendMessage);
+sendBtn.addEventListener("click", sendMessage);
 chatInput.addEventListener("keypress", (e) => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    sendMessage();
+  if (e.key === "Enter") sendMessage();
+});
+
+async function sendMessage() {
+  const text = chatInput.value.trim();
+  if (!text || !currentClient) return;
+  if (currentClient.startsWith("demoClient")) {
+    const msgDiv = document.createElement("div");
+    msgDiv.classList.add("bubble-wrapper", "sent");
+    msgDiv.innerHTML = `<div class="bubble sent">${text}</div>`;
+    chatBox.appendChild(msgDiv);
+    chatInput.value = "";
+    setTimeout(() => {
+      const reply = document.createElement("div");
+      reply.classList.add("bubble-wrapper", "received");
+      reply.innerHTML = `<div class="bubble received">Thank you for your message. Our support representative will review it shortly.</div>`;
+      chatBox.appendChild(reply);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }, 1500);
+    return;
   }
-});
+  await addDoc(collection(db, "clients", currentClient, "messages"), {
+    text,
+    sender: "admin",
+    timestamp: serverTimestamp(),
+  });
+  chatInput.value = "";
+}
 
-logoutBtn.addEventListener("click", async () => {
-  await signOut(auth);
-  window.location.href = "login.html";
-});
-
-
-onAuthStateChanged(auth, (user) => {
-  if (!user) window.location.href = "login.html";
-  else loadClients();
-});
+loadClients();
