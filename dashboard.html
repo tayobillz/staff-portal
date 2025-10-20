@@ -22,7 +22,7 @@
       <li><a href="#" id="nav-dashboard" class="active">Dashboard</a></li>
       <li><a href="records.html" id="nav-records">Records</a></li>
       <li><a href="chat.html" id="nav-chat">Chat</a></li>
-      <li><a href="#" id="logout-btn">Logout</a></li>
+      <li><a href="index.html" id="logout-btn">Logout</a></li>
     </ul>
   </aside>
 
@@ -86,13 +86,13 @@
         const name = user.displayName || user.email.split("@")[0];
         document.getElementById("welcome-msg").textContent = `Welcome, ${name}!`;
       } else {
-        window.location.href = "login.html";
+        window.location.href = "index.html";
       }
     });
 
     document.getElementById("logout-btn").addEventListener("click", async () => {
       await signOut(auth);
-      window.location.href = "login.html";
+      window.location.href = "index.html";
     });
   </script>
 
